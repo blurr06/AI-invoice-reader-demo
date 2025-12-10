@@ -65,7 +65,11 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({ data, onDataChange }
     onDataChange({ ...data, line_items: [...data.line_items, newItem] });
   };
 
+  const totalQty = data.line_items.reduce((sum, item) => sum + (item.qty || 0), 0);
+  const totalUnits = data.line_items.reduce((sum, item) => sum + (item.units || 0), 0);
+  const totalCaseCost = data.line_items.reduce((sum, item) => sum + (item.case_cost || 0), 0);
   const calculatedTotal = data.line_items.reduce((sum, item) => sum + (item.extended_case_cost || 0), 0);
+  
   const invoiceTotal = data.invoice_header.invoice_total || 0;
   const discrepancy = Math.abs(calculatedTotal - invoiceTotal);
   const isMatch = discrepancy < 0.05;
@@ -82,7 +86,7 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({ data, onDataChange }
                 <th className="p-2 border-b border-slate-200 w-32">Scan Code</th>
                 <th className="p-2 border-b border-slate-200 min-w-[200px]">Description</th>
                 <th className="p-2 border-b border-slate-200 w-24">Dept</th>
-                <th className="p-2 border-b border-slate-200 w-16">Units/Case</th>
+                <th className="p-2 border-b border-slate-200 w-16 text-center">Units/Case</th>
                 <th className="p-2 border-b border-slate-200 w-20 text-right">Case Cost</th>
                 <th className="p-2 border-b border-slate-200 w-16 text-right">Disc/Case</th>
                 <th className="p-2 border-b border-slate-200 w-20 text-right">Ext Cost</th>
@@ -219,6 +223,24 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({ data, onDataChange }
                 </tr>
             )}
             </tbody>
+            <tfoot className="bg-slate-50 border-t border-slate-200 sticky bottom-0 z-10 shadow-[0_-1px_2px_rgba(0,0,0,0.05)] text-slate-700 font-semibold">
+              <tr>
+                <td className="p-2 text-center text-xs text-slate-500">Totals</td>
+                <td className="p-2 text-xs">{totalQty}</td>
+                <td className="p-2"></td>
+                <td className="p-2"></td>
+                <td className="p-2"></td>
+                <td className="p-2"></td>
+                <td className="p-2 text-center text-xs">{totalUnits}</td>
+                <td className="p-2 text-right text-xs font-mono">${totalCaseCost.toFixed(2)}</td>
+                <td className="p-2"></td>
+                <td className="p-2 text-right text-xs font-mono">${calculatedTotal.toFixed(2)}</td>
+                <td className="p-2"></td>
+                <td className="p-2"></td>
+                <td className="p-2"></td>
+                <td className="p-2"></td>
+              </tr>
+            </tfoot>
         </table>
       </div>
       
@@ -235,7 +257,7 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({ data, onDataChange }
 
             <div className="flex items-center gap-8 text-sm">
                 <div className="text-slate-500">
-                    Total Items: <span className="font-semibold text-slate-800">{data.line_items.length}</span>
+                    Line Items: <span className="font-semibold text-slate-800">{data.line_items.length}</span>
                 </div>
                 
                 <div className="flex items-center gap-6 bg-white px-4 py-2 rounded-lg border border-slate-200 shadow-sm">

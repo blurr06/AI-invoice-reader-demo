@@ -13,12 +13,14 @@ Your job – step by step:
 4. Extract quantity, product code(s), description, pack/size, and pricing for each row.
 5. Analyze for Discounts:
    - Identify line-level discounts.
+   - If a line has MULTIPLE discounts (e.g., $2.00 off AND $1.50 off), SUM THEM UP (Total $3.50).
+   - IMPORTANT: The extracted 'case_discount' MUST BE A POSITIVE NUMBER. If the invoice says "-5.00", extract it as 5.00.
    - Calculate 'case_discount' as the discount amount PER CASE.
 6. CRITICAL - ENSURE TOTAL MATCH:
    - The sum of 'extended_case_cost' for all rows MUST equal the 'invoice_total'.
    - If there are Taxes, Freight, Bottle Deposits (CRV), Fuel Surcharges, or Pallet Fees listed outside the main table, CREATE A NEW LINE ITEM for each.
-     - Description: "Tax", "Freight", "CRV", etc.
-     - Item Code: "TAX", "FEE", etc.
+     - Description: "Tax", "Freight", "CRV", "Bottle Deposit", etc.
+     - Item Code: "TAX", "FEE", "CRV", etc.
      - Qty: 1 (or as appropriate)
      - Case Cost: The total amount of that fee.
      - Department: "Fees" or "Tax".

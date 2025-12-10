@@ -5,7 +5,7 @@ import { ImageViewer } from './components/ImageViewer';
 import { Header } from './components/Header';
 import { analyzeInvoice } from './services/geminiService';
 import { InvoiceData } from './types';
-import { ArrowLeft, Save, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Save, CheckCircle2, Trash2, Upload } from 'lucide-react';
 
 const App: React.FC = () => {
   const [invoiceFile, setInvoiceFile] = useState<File | null>(null);
@@ -158,9 +158,23 @@ const App: React.FC = () => {
                       )}
                     </div>
                     <div className="flex gap-2">
+                      <button 
+                        onClick={handleReset}
+                        className="flex items-center gap-2 px-3 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-md text-sm font-medium transition-colors"
+                      >
+                        <Upload className="w-4 h-4" />
+                        Upload Another
+                      </button>
+                      <button 
+                        onClick={handleReset}
+                        className="flex items-center gap-2 px-3 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md text-sm font-medium transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        Delete
+                      </button>
                       <button className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-sm font-medium transition-colors shadow-sm">
                         <Save className="w-4 h-4" />
-                        Export to Back Office
+                        Save to Purchase Entries
                       </button>
                     </div>
                   </div>

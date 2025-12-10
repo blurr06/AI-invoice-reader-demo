@@ -1,0 +1,5 @@
+{
+  "name": "AI Invoice Reader",
+  "description": "Intelligent invoice processing for convenience stores using Gemini 2.0 Pro Vision.",
+  "requestFramePermissions": []
+}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { InvoiceData, LineItem } from '../types';
-import { AlertTriangle, Trash2, Calculator, Plus } from 'lucide-react';
+import { AlertTriangle, Trash2, Calculator, Plus, Wand2 } from 'lucide-react';
 
 interface InvoiceTableProps {
   data: InvoiceData;
@@ -45,7 +45,7 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({ data, onDataChange }
       qty: 1,
       item_code: '',
       scan_code: '',
-      item_description: 'New Item',
+      item_description: '',
       department: '',
       price_group: '',
       product_category: '',
@@ -65,14 +65,43 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({ data, onDataChange }
     onDataChange({ ...data, line_items: [...data.line_items, newItem] });
   };
 
+  // Calculate totals
   const totalQty = data.line_items.reduce((sum, item) => sum + (item.qty || 0), 0);
   const totalUnits = data.line_items.reduce((sum, item) => sum + (item.units || 0), 0);
   const totalCaseCost = data.line_items.reduce((sum, item) => sum + (item.case_cost || 0), 0);
   const calculatedTotal = data.line_items.reduce((sum, item) => sum + (item.extended_case_cost || 0), 0);
   
   const invoiceTotal = data.invoice_header.invoice_total || 0;
-  const discrepancy = Math.abs(calculatedTotal - invoiceTotal);
+  const rawDiff = invoiceTotal - calculatedTotal;
+  const discrepancy = Math.abs(rawDiff);
   const isMatch = discrepancy < 0.05;
+
+  const handleAutoBalance = () => {
+      // Create a new line item that covers the exact difference
+      const newItem: LineItem = {
+        row_index: data.line_items.length + 1,
+        qty: 1,
+        item_code: 'ADJ',
+        scan_code: '',
+        item_description: 'Balance Adjustment',
+        department: 'Fees',
+        price_group: '',
+        product_category: '',
+        units: 1,
+        case_cost: rawDiff, // Set cost to the difference
+        case_discount: 0,
+        cost_per_unit_after_discount: rawDiff,
+        extended_case_cost: rawDiff,
+        unit_retail: 0,
+        extended_unit_retail: 0,
+        size: '',
+        default_margin_percent: 0,
+        calculated_margin_percent: 0,
+        confidence: 1,
+        notes: 'Auto-generated to match invoice total'
+      };
+      onDataChange({ ...data, line_items: [...data.line_items, newItem] });
+  };
 
   return (
     <div className="w-full h-full overflow-auto custom-scrollbar bg-slate-50 flex flex-col">
@@ -281,9 +310,18 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({ data, onDataChange }
                     )}
 
                     {invoiceTotal > 0 && !isMatch && (
-                        <div className="flex items-center gap-2 text-red-600 bg-red-50 px-2 py-1 rounded ml-2">
-                            <Calculator className="w-4 h-4" />
-                            <span className="font-semibold text-xs">Diff: ${(calculatedTotal - invoiceTotal).toFixed(2)}</span>
+                        <div className="flex items-center gap-2">
+                             <div className="flex items-center gap-2 text-red-600 bg-red-50 px-3 py-1.5 rounded border border-red-100">
+                                <Calculator className="w-4 h-4" />
+                                <span className="font-semibold text-xs">Diff: ${rawDiff.toFixed(2)}</span>
+                            </div>
+                            <button 
+                                onClick={handleAutoBalance}
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded shadow-sm text-xs font-medium transition-all animate-pulse"
+                            >
+                                <Wand2 className="w-3.5 h-3.5" />
+                                Fix Discrepancy
+                            </button>
                         </div>
                     )}
 

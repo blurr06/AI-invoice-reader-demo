@@ -40,9 +40,9 @@ export const analyzeInvoice = async (invoiceFile: File, priceBookFile: File | nu
   if (priceBookFile) {
     try {
       const priceBookContent = await readFileAsText(priceBookFile);
-      // Limit pricebook content length to avoid context window issues if extremely huge, 
-      // though Gemini 1.5/2.0 context is large. Truncating at 100k chars for safety in this demo.
-      const truncatedPriceBook = priceBookContent.substring(0, 100000); 
+      // Limit pricebook content length to avoid context window issues.
+      // Gemini 2.5 Flash has a large context window, but keeping it efficient is good.
+      const truncatedPriceBook = priceBookContent.substring(0, 200000); 
       promptText += `\n\nHERE IS THE PRICE BOOK DATA (CSV format):\n${truncatedPriceBook}\n\nUse this to look up item details.`;
     } catch (e) {
       console.warn("Failed to read price book file", e);
@@ -57,7 +57,7 @@ export const analyzeInvoice = async (invoiceFile: File, priceBookFile: File | nu
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-preview', // User specifically requested this model
+      model: 'gemini-2.5-flash', // Switched to 2.5 Flash for much faster processing (10-30s)
       contents: [
         {
           role: 'user',

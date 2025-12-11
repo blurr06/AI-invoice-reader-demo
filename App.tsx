@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { FileUpload } from './components/FileUpload';
 import { InvoiceTable } from './components/InvoiceTable';
 import { ImageViewer } from './components/ImageViewer';
@@ -11,14 +11,39 @@ const App: React.FC = () => {
   const [invoiceFile, setInvoiceFile] = useState<File | null>(null);
   const [priceBookFile, setPriceBookFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Simulated progress bar logic
+  useEffect(() => {
+    let interval: any;
+    if (isProcessing) {
+      setProgress(5); // Start at 5%
+      interval = setInterval(() => {
+        setProgress((prev) => {
+          // Cap at 95% until complete
+          if (prev >= 95) return prev;
+          // Decaying increment: moves faster at start, slower at end
+          const remaining = 95 - prev;
+          const increment = Math.max(0.2, remaining * 0.05); 
+          return Math.min(95, prev + increment);
+        });
+      }, 200);
+    } else {
+      setProgress(0);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isProcessing]);
 
   const handleReset = () => {
     setInvoiceFile(null);
     setPriceBookFile(null);
     setInvoiceData(null);
     setError(null);
+    setProgress(0);
   };
 
   const handleProcess = async () => {
@@ -92,14 +117,24 @@ const App: React.FC = () => {
             {/* Right Panel: Controls or Data */}
             <div className="w-2/3 h-full flex flex-col bg-white">
               {isProcessing ? (
-                // Loading State
-                 <div className="h-full flex flex-col items-center justify-center space-y-6 bg-slate-50/50">
-                    <div className="relative">
-                        <div className="w-16 h-16 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
+                // Loading State with Progress Bar
+                 <div className="h-full flex flex-col items-center justify-center space-y-8 bg-slate-50/50">
+                    <div className="w-full max-w-md space-y-4 px-8">
+                        <div className="flex justify-between text-sm font-medium text-slate-600">
+                            <span>Processing...</span>
+                            <span>{Math.round(progress)}%</span>
+                        </div>
+                        <div className="w-full h-3 bg-slate-200 rounded-full overflow-hidden shadow-inner">
+                            <div 
+                                className="h-full bg-indigo-600 transition-all duration-300 ease-out rounded-full"
+                                style={{ width: `${progress}%` }}
+                            />
+                        </div>
                     </div>
+                    
                     <div className="text-center space-y-2">
                         <h2 className="text-xl font-semibold text-slate-900">Analyzing Invoice...</h2>
-                        <p className="text-slate-500 max-w-sm">
+                        <p className="text-slate-500 max-w-sm mx-auto">
                         Gemini is reading line items, matching product codes, and calculating margins. This may take a moment.
                         </p>
                     </div>

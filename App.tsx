@@ -22,12 +22,14 @@ const App: React.FC = () => {
       setProgress(5); // Start at 5%
       interval = setInterval(() => {
         setProgress((prev) => {
-          // Cap at 95% until complete
-          if (prev >= 95) return prev;
-          // Decaying increment: moves faster at start, slower at end
-          const remaining = 95 - prev;
-          const increment = Math.max(0.2, remaining * 0.05); 
-          return Math.min(95, prev + increment);
+          // Cap at 90% until complete (leave buffer)
+          if (prev >= 90) return prev;
+          
+          // Slower decay curve to handle potentially 30-40s wait times smoothly
+          // Moves fast initially, then crawls
+          const remaining = 90 - prev;
+          const increment = Math.max(0.1, remaining * 0.02); 
+          return Math.min(90, prev + increment);
         });
       }, 200);
     } else {
@@ -55,9 +57,11 @@ const App: React.FC = () => {
     try {
       const data = await analyzeInvoice(invoiceFile, priceBookFile);
       setInvoiceData(data);
+      setProgress(100); // Jump to completion
     } catch (err: any) {
       setError(err.message || "Failed to process invoice. Please try again.");
       console.error(err);
+      setProgress(0);
     } finally {
       setIsProcessing(false);
     }

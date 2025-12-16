@@ -23,6 +23,15 @@ Your job – step by step:
      1. Extract the value directly from the **ITEM** column (e.g., "00025190").
      2. Set this value exactly as the 'item_code'.
 
+   **VENDOR SPECIFIC RULE (COCA COLA / REYES):**
+   - These invoices often list discounts (labeled "ZDCS", "DCS", "PROMO") on the main line AND on lines immediately following the item.
+   - **CRITICAL:** specific line items often have **MULTIPLE discounts**.
+   - **Action:** Look for all negative amounts or "ZDCS" codes associated with the item (on the same row or rows below it).
+   - **Summation:** Add all these discounts together to get the total 'case_discount'.
+   - Example: Row has "ZDCS -2.26" and line below has "ZDCS -20.16".
+     -> Total Discount = 2.26 + 20.16 = 22.42.
+     -> Set 'case_discount' to 22.42.
+
    **RETURNS HANDLING (ALL VENDORS):**
    - Look for sections marked "**RETURNS**", "CREDITS", or items with negative totals.
    - For any returned item, the 'qty' MUST be extracted as a **NEGATIVE** number (e.g., -1, -12).

@@ -23,7 +23,7 @@ Your job – step by step:
      1. Extract the value directly from the **ITEM** column (e.g., "00025190").
      2. Set this value exactly as the 'item_code'.
 
-   **VENDOR SPECIFIC RULE (COCA COLA / REYES):**
+   **VENDOR SPECIFIC RULE (COCA COLA / REYES - DISCOUNTS):**
    - These invoices often list discounts (labeled "ZDCS", "DCS", "PROMO") on the main line AND on lines immediately following the item.
    - **CRITICAL:** specific line items often have **MULTIPLE discounts**.
    - **Action:** Look for all negative amounts or "ZDCS" codes associated with the item (on the same row or rows below it).
@@ -31,6 +31,15 @@ Your job – step by step:
    - Example: Row has "ZDCS -2.26" and line below has "ZDCS -20.16".
      -> Total Discount = 2.26 + 20.16 = 22.42.
      -> Set 'case_discount' to 22.42.
+
+   **VENDOR SPECIFIC RULE (COCA COLA / REYES - COLUMNS):**
+   - These invoices typically have columns: "PRICE", "RATE", "NET" (or "EXTENDED").
+   - "PRICE" = Base List Price.
+   - "RATE" = Unit Price AFTER Discount (Per Case).
+   - "NET" / "EXTENDED" = Total Line Cost (Qty * Rate).
+   - **ERROR PREVENTION:** Do NOT extract the "RATE" column as the 'extended_case_cost'.
+   - **CORRECT ACTION:** You MUST extract the "NET" or "EXTENDED" column into 'extended_case_cost'.
+   - **MATH CHECK:** Ensure 'extended_case_cost' ≈ 'qty' * 'rate'.
 
    **RETURNS HANDLING (ALL VENDORS):**
    - Look for sections marked "**RETURNS**", "CREDITS", or items with negative totals.

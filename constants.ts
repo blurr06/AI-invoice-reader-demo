@@ -8,9 +8,16 @@ Input:
 Optional: Price book content provided as text/context.
 
 Your job – step by step:
-1. Read the invoice image/PDF carefully.
+1. Read the invoice image/PDF carefully. 
+   **CRITICAL MULTI-PAGE RULE:** 
+   - The input is often a **MULTI-PAGE** PDF. 
+   - You **MUST** scroll through and extract line items from **EVERY SINGLE PAGE**.
+   - Do **NOT** stop after the first page.
+   - The "Invoice Total" is typically found on the **LAST PAGE**.
+   - You must verify that the sum of line items from Pages 1, 2, 3... N equals the total on Page N.
+
 2. Identify the main line-item grid/table.
-3. Extract the "Invoice Total" or "Pay This Amount" from the header/footer.
+3. Extract the "Invoice Total" or "Pay This Amount" from the header/footer (usually on the last page).
 4. Extract quantity, product code(s), description, pack/size, and pricing for each row.
 
    **VENDOR SPECIFIC RULE (FRITO LAY):**
@@ -40,6 +47,19 @@ Your job – step by step:
    - **ERROR PREVENTION:** Do NOT extract the "RATE" column as the 'extended_case_cost'.
    - **CORRECT ACTION:** You MUST extract the "NET" or "EXTENDED" column into 'extended_case_cost'.
    - **MATH CHECK:** Ensure 'extended_case_cost' ≈ 'qty' * 'rate'.
+
+   **GENERAL RULE: ITEM CODE vs SCAN CODE (UPC):**
+   - **Item Code:** This is the distributor's internal product number.
+     - Characteristics: Usually SHORT (less than 10 digits, typically 4-7 digits).
+     - Location: Often in a column labeled "ITEM", "PROD #", "CODE".
+     - Example: "27205", "123456", "5534".
+   - **Scan Code:** This is the manufacturer's UPC or GTIN.
+     - Characteristics: LONG (10 to 14 digits).
+     - Location: Often below the description, or in a "UPC" / "GTIN" column.
+     - Example: "071990300050", "008066095301".
+   - **RULE:** If you find a long number (>= 10 digits), it MUST go into 'scan_code'. 
+   - **RULE:** If you find a short number (< 10 digits) in the item column, it MUST go into 'item_code'.
+   - **Do NOT** put the long UPC in the 'item_code' field.
 
    **RETURNS HANDLING (ALL VENDORS):**
    - Look for sections marked "**RETURNS**", "CREDITS", or items with negative totals.

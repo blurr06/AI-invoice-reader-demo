@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { InvoiceData } from "../types";
 import { SYSTEM_INSTRUCTION } from "../constants";
@@ -82,7 +83,7 @@ export const analyzeInvoice = async (invoiceFile: File, priceBookFile: File | nu
   const ai = new GoogleGenAI({ apiKey });
 
   // Prepare the prompt content
-  let promptText = "Analyze this invoice image. Extract data into the specified JSON structure.";
+  let promptText = "Analyze this invoice. This may be a MULTI-PAGE document. Extract line items from EVERY PAGE. Do not stop until you process the very last item on the last page. Verify that the sum of extracted line items matches the Invoice Total found on the last page. Extract data into the specified JSON structure.";
 
   if (priceBookFile) {
     try {

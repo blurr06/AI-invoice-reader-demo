@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { InvoiceData } from "../types";
 import { SYSTEM_INSTRUCTION } from "../constants";
@@ -28,7 +27,7 @@ const readFileAsText = async (file: File): Promise<string> => {
 };
 
 // Define the exact schema for the model response
-// Optimized: Removed row_index (calculated on client) to save tokens
+// Optimized: Removed row_index (calculated on client) to save output tokens
 const invoiceSchema: Schema = {
   type: Type.OBJECT,
   properties: {
@@ -72,6 +71,60 @@ const invoiceSchema: Schema = {
       },
     },
   },
+};
+
+const edgeDetectionSchema: Schema = {
+  type: Type.OBJECT,
+  properties: {
+    corners: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          x: { type: Type.NUMBER, description: "X coordinate percentage (0-100)" },
+          y: { type: Type.NUMBER, description: "Y coordinate percentage (0-100)" }
+        }
+      }
+    }
+  }
+};
+
+export const detectDocumentBounds = async (imageFile: File): Promise<{x: number, y: number}[]> => {
+  const apiKey = process.env.API_KEY;
+  if (!apiKey) throw new Error("API Key is missing");
+
+  const ai = new GoogleGenAI({ apiKey });
+  const imageBase64 = await fileToGenerativePart(imageFile);
+  
+  // Simple determination of mime type
+  const mimeType = imageFile.type || 'image/jpeg';
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: [{
+        role: 'user',
+        parts: [
+          { text: "Detect the 4 corners of the document/paper in this image. Return the coordinates as percentages (0-100) relative to the image size. Order MUST be: Top-Left, Top-Right, Bottom-Right, Bottom-Left." },
+          { inlineData: { mimeType, data: imageBase64 } }
+        ]
+      }],
+      config: {
+        responseMimeType: 'application/json',
+        responseSchema: edgeDetectionSchema,
+        temperature: 0
+      }
+    });
+
+    const text = response.text;
+    if (!text) return [];
+    const data = JSON.parse(text);
+    return data.corners || [];
+
+  } catch (error) {
+    console.warn("Edge detection failed", error);
+    return [];
+  }
 };
 
 export const analyzeInvoice = async (invoiceFile: File, priceBookFile: File | null): Promise<InvoiceData> => {

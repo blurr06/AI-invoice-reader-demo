@@ -1,3 +1,4 @@
+
 export interface InvoiceHeader {
   vendor_name: string | null;
   invoice_number: string | null;
@@ -33,4 +34,18 @@ export interface LineItem {
 export interface InvoiceData {
   invoice_header: InvoiceHeader;
   line_items: LineItem[];
+}
+
+export type InvoiceStatus = 'processing' | 'ready' | 'error' | 'saved';
+
+export interface InvoiceRecord {
+  id: string;
+  vendor: string;
+  uploadDate: string;
+  status: InvoiceStatus;
+  file: File;
+  data?: InvoiceData;
+  error?: string;
+  thumbnailUrl?: string;
+  isAiGenerated?: boolean;
 }
